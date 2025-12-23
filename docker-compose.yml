@@ -1,0 +1,104 @@
+
+services:
+  planner:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.planner
+    ports:
+      - "8201:8201"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8201/health')\" || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agent-net
+
+  progress:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.progress
+    ports:
+      - "8202:8202"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8202/health')\" || exit 1" ]
+    networks:
+      - agent-net
+    dns:
+      - 8.8.8.8
+
+  risks:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.risks
+    ports:
+      - "8203:8203"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8203/health')\" || exit 1" ]
+    networks:
+      - agent-net
+    dns:
+      - 8.8.8.8
+
+  digest:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.digest
+    ports:
+      - "8204:8204"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8204/health')\" || exit 1" ]
+    networks:
+      - agent-net
+    dns:
+      - 8.8.8.8
+
+
+  image:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.image
+    ports:
+      - "8205:8205"
+    env_file:
+      - .env
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8205/health')\" || exit 1"
+      ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - agent-net
+    dns:
+      - 8.8.8.8
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    env_file:
+      - .env
+    networks:
+      - agent-net
+
+networks:
+  agent-net:
+    driver: bridge
+
+volumes:
+  n8n_data:

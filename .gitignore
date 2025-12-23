@@ -1,0 +1,37 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+
+# Env files
+.env
+.env.*
+
+# Poetry / virtualenv
+.venv/
+python-wsl
+
+# Docker artifacts
+*.pid
+*.sock
+*.db
+docker/*.log
+
+# IDE and editor configs
+.idea/
+.vscode/
+*~
+
+# n8n local data
+.n8n/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+*.http
+tests/__pycache__/
