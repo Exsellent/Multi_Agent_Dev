@@ -1,0 +1,65 @@
+@startuml
+!theme plain
+skinparam shadowing false
+skinparam backgroundColor white
+
+' Colors of the participants
+skinparam participant {
+  BackgroundColor #F0F8FF
+  BorderColor #333333
+  FontSize 13
+  FontStyle bold
+}
+
+' Default arrow colors
+skinparam sequenceArrowThickness 2
+skinparam sequenceLifeLineBorderColor #666666
+
+autonumber
+title MCP Message Flow
+
+participant "n8n" as N8N #FFA500
+participant "Planner Agent" as Planner #87CEEB
+participant "Risk Agent" as Risk #F08080
+participant "Image Agent" as Image #DDA0DD
+participant "Metrics Agent" as Metrics #90EE90
+
+' 1. n8n -> Planner
+N8N -[#0000FF]> Planner : <color:blue><b>POST /mcp { method, params }</b></color>
+
+' 2. Internal reasoning
+activate Planner #E6F3FF
+Planner -[#808080]> Planner : <color:gray><i>reasoning (planning steps)</i></color>
+
+' 3. Planner -> Risk
+Planner -[#DC143C]> Risk : <color:red><b>MCP request</b></color>
+activate Risk #FFE4E4
+Risk --[#DC143C]> Planner : <color:red>JSON + reasoning</color>
+deactivate Risk
+
+' 5. Planner -> Image
+Planner -[#9932CC]> Image : <color:purple><b>MCP request</b></color>
+activate Image #F3E6FF
+Image --[#9932CC]> Planner : <color:purple>image analysis / generation</color>
+deactivate Image
+
+' 7. Planner -> Metrics
+Planner -[#228B22]> Metrics : <color:green><b>MCP request</b></color>
+activate Metrics #E6FFE6
+Metrics --[#228B22]> Planner : <color:green>metrics recorded</color>
+deactivate Metrics
+
+deactivate Planner
+
+' 9. Planner -> n8n
+Planner --[#0000FF]> N8N : <color:blue><b>structured response (JSON)</b></color>
+
+legend right
+  |= <color:blue>■</color> |= n8n communication |
+  |= <color:red>■</color> |= Risk assessment |
+  |= <color:purple>■</color> |= Image processing |
+  |= <color:green>■</color> |= Metrics collection |
+  |= <color:gray>■</color> |= Internal reasoning |
+endlegend
+
+@enduml

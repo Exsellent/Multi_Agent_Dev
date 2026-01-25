@@ -1,0 +1,62 @@
+@startuml
+skinparam shadowing false
+skinparam backgroundColor white
+
+skinparam participant {
+  BackgroundColor #F0F8FF
+  BorderColor #4682B4
+}
+
+actor User #Orange
+participant "n8n" as n8n #FFE4B5
+participant "Planner Agent" as planner #87CEEB
+participant "Progress Agent" as progress #90EE90
+participant "Risk Agent" as risk #F08080
+participant "Digest Agent" as digest #F0E68C
+participant "Image Agent" as image #DDA0DD
+participant "Metrics Agent" as metrics #D3D3D3
+
+title n8n → MCP Agent Pipeline
+
+User -> n8n: Trigger (webhook/schedule)
+n8n -> planner: Send MCP request
+
+activate planner #D4E9FF
+planner -> planner: Analyze input
+planner -> planner: Create execution plan
+
+par Parallel Agent Calls
+  planner -> progress: Call /mcp
+  activate progress #90EE90
+  progress --> planner: JSON response
+  deactivate progress
+else
+  planner -> risk: Call /mcp
+  activate risk #F08080
+  risk --> planner: JSON response
+  deactivate risk
+else
+  planner -> digest: Call /mcp
+  activate digest #F0E68C
+  digest --> planner: JSON response
+  deactivate digest
+else
+  planner -> image: Call /mcp
+  activate image #DDA0DD
+  image --> planner: JSON response
+  deactivate image
+else
+  planner -> metrics: Call /mcp
+  activate metrics #D3D3D3
+  metrics --> planner: JSON response
+  deactivate metrics
+end
+
+planner -> planner: Collect responses
+planner -> planner: Aggregate result
+deactivate planner
+
+planner --> n8n: Final result
+n8n --> User: Response
+
+@enduml

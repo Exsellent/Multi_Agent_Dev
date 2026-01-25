@@ -1,0 +1,113 @@
+@startuml
+!theme plain
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+skinparam padding 3
+
+' Styles for components
+skinparam component {
+  BorderColor #333333
+  FontSize 12
+  ArrowThickness 2
+}
+
+skinparam note {
+  BackgroundColor #FFFACD
+  BorderColor #DAA520
+}
+
+title Multi-Agent DevOps Assistant — Architecture (Educational Project)
+
+actor "Developer / User" as dev #87CEEB
+
+cloud "External Services" {
+  component "Groq LLM\n(Llama 3.3)" as groq #F08080
+  component "Jira Cloud" as jira #F0E68C
+  component "Prometheus\n(Metrics Storage)" as prometheus #D3D3D3
+}
+
+component "Static Server\n(Python / Nginx)" as static #90EE90
+
+component "n8n\n(Workflow Orchestrator)" as n8n #FFA500
+
+package "MCP Agents (Docker Containers)" {
+  component "Planner Agent\n:8201" as planner #87CEEB
+  component "Progress Agent\n:8202" as progress #90EE90
+  component "Risks Agent\n:8203" as risks #FFB6C1
+  component "Digest Agent\n:8204" as digest #FFFFE0
+  component "Image Agent\n:8205" as image #DDA0DD
+  component "Health Monitor\n:8206" as health #FF6347
+  component "Metrics Agent\n:8207" as metrics #D3D3D3
+}
+
+' Notes
+note right of n8n
+  <b>Central Orchestrator</b>
+  • Starts workflows
+  • Calls agents via HTTP/MCP
+end note
+
+note right of planner
+  <b>Task planning</b>
+  Main Coordinator
+end note
+
+note right of health
+  <b>Checks periodically</b>
+  /health of all agents
+end note
+
+note right of metrics
+  <b>Collects task</b>
+  and error counters
+end note
+
+note right of image
+  <b>Diagram and UI Analysis</b>
+  (text fallback)
+end note
+
+' Connections with colored arrows
+dev -[#0000FF]-> n8n : <color:blue>Manual trigger / Webhook</color>
+
+n8n -[#228B22]-> planner : <color:green>MCP call</color>
+n8n -[#FF8C00]-> progress : <color:orange>MCP call</color>
+n8n -[#DC143C]-> risks : <color:red>MCP call</color>
+n8n -[#9932CC]-> digest : <color:purple>MCP call</color>
+n8n -[#8B4513]-> image : <color:brown>MCP call</color>
+n8n -[#808080]-> health : <color:gray>MCP call</color>
+n8n -[#008080]-> metrics : <color:teal>MCP call</color>
+
+planner -[#0000FF]-> groq : <color:blue>LLM</color>
+progress -[#228B22]-> groq : <color:green>LLM</color>
+risks -[#DC143C]-> groq : <color:red>LLM</color>
+digest -[#9932CC]-> groq : <color:purple>LLM</color>
+image -[#8B4513]-> groq : <color:brown>LLM</color>
+
+progress -[#FF8C00]-> jira : <color:orange>Read issues (velocity)</color>
+planner -[#0000FF]-> jira : <color:blue>Create tasks (optional)</color>
+
+metrics -[#000000]-> prometheus : <color:black>Store metrics</color>
+
+health -[#DC143C]down-> planner
+health -[#DC143C]down-> progress
+health -[#DC143C]down-> risks
+health -[#DC143C]down-> digest
+health -[#DC143C]down-> image
+health -[#DC143C]down-> metrics
+
+image -[#228B22]-> static : <color:green>Fetch images/diagrams</color>
+
+legend right
+  |= <color:blue>■</color> |= n8n → Planner/Jira |
+  |= <color:green>■</color> |= Progress/Images |
+  |= <color:orange>■</color> |= Progress → Jira |
+  |= <color:red>■</color> |= Risk analysis |
+  |= <color:purple>■</color> |= Digest |
+  |= <color:brown>■</color> |= Image processing |
+  |= <color:gray>■</color> |= Health checks |
+  |= <color:teal>■</color> |= Metrics |
+endlegend
+
+@enduml
