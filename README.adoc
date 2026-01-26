@@ -33,11 +33,14 @@ image:https://img.shields.io/badge/n8n-automation-orange.svg[n8n, link=https://n
 * используется LLM для анализа, генерации и reasoning;
 * присутствует мультимодальный агент (работа с изображениями).
 
----
-image::assets/AI_agents.png[Multi-Agent System Overview, width=800, align=center]
-=== 2.1 Общая архитектурная схема
 
+image::assets/AI_agents.png[Multi-Agent System Overview, width=800, align=center]
+
+---
+
+=== 2.1 Общая архитектурная схема
 image::docs/diagrams/architecture.png[Multi-Agent System Overview, width=800, align=center]
+
 
 Диаграмма отражает:
 - роль n8n как оркестратора;
@@ -49,7 +52,8 @@ image::docs/diagrams/architecture.png[Multi-Agent System Overview, width=800, al
 
 === 2.2 Пайплайн обработки запросов (n8n → агенты)
 
-image::docs/diagrams/pipeline.png[Pipeline Overview, width=800, align=center]
+image::docs/diagrams/pipeline.png[Multi-Agent System Overview, width=800, align=center]
+
 
 Пайплайн демонстрирует последовательность вызовов агентов,
 инициируемых workflow в n8n.

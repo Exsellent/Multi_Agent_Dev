@@ -89,13 +89,25 @@ class HealthMonitorAgent(MCPAgent):
 
     def _next_step(self, reasoning: List[ReasoningStep], description: str,
                    input_data: Optional[Dict] = None, output_data: Optional[Dict] = None):
-        """ Helper to add sequential reasoning steps"""
+        """Helper to add sequential reasoning steps"""
         reasoning.append(ReasoningStep(
             step_number=len(reasoning) + 1,
             description=description,
             input_data=input_data or {},
             output_data=output_data or {}
         ))
+
+    def _get_mock_metrics(self) -> Dict[str, Dict[str, int]]:
+        """Get metrics data for educational project (7 agents)"""
+        return {
+            "planner": {"tasks_processed": 45, "errors": 2},
+            "risks": {"tasks_processed": 38, "errors": 1},
+            "progress": {"tasks_processed": 30, "errors": 0},
+            "digest": {"tasks_processed": 25, "errors": 0},
+            "image": {"tasks_processed": 15, "errors": 3},
+            "health_monitor": {"tasks_processed": 60, "errors": 0},
+            "metrics_agent": {"tasks_processed": 10, "errors": 0}
+        }
 
     def _classify_agent_health(
             self,
@@ -304,17 +316,7 @@ class HealthMonitorAgent(MCPAgent):
 
         # Step 2: Collect metrics (if not provided)
         if metrics is None:
-            # In production, call MetricsAgent here
-            # For now, use mock data
-            metrics = {
-                "planner": {"tasks_processed": 45, "errors": 2},
-                "risks": {"tasks_processed": 38, "errors": 1},
-                "progress": {"tasks_processed": 30, "errors": 0},
-                "digest": {"tasks_processed": 25, "errors": 0},
-                "image": {"tasks_processed": 15, "errors": 3},
-                "health_monitor": {"tasks_processed": 60, "errors": 0},
-                "metrics_agent": {"tasks_processed": 10, "errors": 0}
-            }
+            metrics = self._get_mock_metrics()
 
             self._next_step(reasoning, "Collected metrics from internal store",
                             output_data={
@@ -341,7 +343,7 @@ class HealthMonitorAgent(MCPAgent):
                             "unreachable": sum(1 for r in reachability.values() if not r)
                         })
 
-        # Step 4 - Calculate error rates and classify health
+        # Step 4: Calculate error rates and classify health
         agent_healths = []
         for agent_name in agents.keys():
             agent_metrics = metrics.get(agent_name, {"tasks_processed": 0, "errors": 0})
@@ -365,7 +367,7 @@ class HealthMonitorAgent(MCPAgent):
         self._next_step(reasoning, "Classified health status for all agents",
                         output_data=health_summary)
 
-        # Step 5 - Assess overall system health
+        # Step 5: Assess overall system health
         system_health = self._assess_system_health(agent_healths)
 
         self._next_step(reasoning, "Assessed overall system health",
@@ -374,7 +376,7 @@ class HealthMonitorAgent(MCPAgent):
                             "systemic_risk": system_health.systemic_risk
                         })
 
-        #  Step 6 - Generate recommendations
+        # Step 6: Generate recommendations
         recommendations = self._generate_recommendations(agent_healths, system_health)
 
         self._next_step(reasoning, "Generated health recommendations",
@@ -384,7 +386,7 @@ class HealthMonitorAgent(MCPAgent):
                             "investigations": len(recommendations["investigation"])
                         })
 
-        #  Step 7 - Optional AI analysis (only if issues detected)
+        # Step 7: Optional AI analysis (only if issues detected)
         ai_analysis = None
         if system_health.overall_status != "HEALTHY":
             # Prepare structured summary for LLM
@@ -421,7 +423,7 @@ Keep analysis under 200 words."""
                                     "llm_used": False
                                 })
 
-        # Step 8 - Health check completed
+        # Step 8: Health check completed
         self._next_step(reasoning, "Health check completed",
                         output_data={
                             "total_agents": len(agent_healths),
@@ -438,8 +440,8 @@ Keep analysis under 200 words."""
         return {
             "system_health": asdict(system_health),
             "agent_healths": [asdict(h) for h in agent_healths],
-            "recommendations": recommendations,  # Actionable decisions
-            "ai_analysis": ai_analysis,  # Optional LLM insights
+            "recommendations": recommendations,
+            "ai_analysis": ai_analysis,
             "reasoning": reasoning
         }
 
@@ -462,11 +464,7 @@ Keep analysis under 200 words."""
 
         # Get agent metrics
         if metrics is None:
-            # Mock for demo
-            all_metrics = {
-                "planner": {"tasks_processed": 45, "errors": 2},
-                "image": {"tasks_processed": 15, "errors": 3}
-            }
+            all_metrics = self._get_mock_metrics()
             metrics = all_metrics.get(agent_name, {"tasks_processed": 0, "errors": 0})
 
         self._next_step(reasoning, "Collected agent metrics",
@@ -527,13 +525,8 @@ Keep analysis under 200 words."""
         self._next_step(reasoning, "System status check initiated",
                         input_data={"mode": "lightweight"})
 
-        # Get metrics
-        metrics = {
-            "planner": {"tasks_processed": 45, "errors": 2},
-            "risks": {"tasks_processed": 38, "errors": 1},
-            "progress": {"tasks_processed": 30, "errors": 0},
-            "digest": {"tasks_processed": 25, "errors": 0}
-        }
+        # Get metrics for all educational project agents
+        metrics = self._get_mock_metrics()
 
         # Classify health
         agent_healths = [
