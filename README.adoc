@@ -22,7 +22,19 @@ image:https://img.shields.io/badge/Groq-AI-red.svg[Groq, link=https://groq.com/]
 image:https://img.shields.io/badge/n8n-automation-orange.svg[n8n, link=https://n8n.io/]
 
 ---
+== 1. Общая идея проекта
 
+Система реализует мультиагентную архитектуру, в которой:
+
+* каждый агент является отдельным сервисом;
+* взаимодействие осуществляется через MCP-протокол;
+* оркестрация выполняется с помощью n8n;
+* поддерживается масштабирование и отказоустойчивость;
+* используется LLM для анализа, генерации и reasoning;
+* присутствует мультимодальный агент (работа с изображениями).
+
+---
+image::assets/AI_agents.png[Multi-Agent System Overview, width=800, align=center]
 === 2.1 Общая архитектурная схема
 
 image::docs/diagrams/architecture.png[Multi-Agent System Overview, width=800, align=center]
