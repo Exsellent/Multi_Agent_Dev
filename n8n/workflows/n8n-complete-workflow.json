@@ -1,0 +1,269 @@
+{
+  "name": "Multi-Agent DevOps Assistant - Complete Demo",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "task_description",
+              "value": "Implement OAuth2 authentication with JWT tokens"
+            },
+            {
+              "name": "architecture_image",
+              "value": "https://i.imgur.com/E8i3qo8.png"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-input",
+      "name": "Set Input Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://planner:8201/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/plan\",\n  \"params\": {\n    \"description\": \"{{ $json.task_description }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "planner-agent",
+      "name": "1. Planner Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 100]
+    },
+    {
+      "parameters": {
+        "url": "http://risks:8203/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/analyze_risks\",\n  \"params\": {\n    \"feature\": \"{{ $('Set Input Variables').item.json.task_description }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "risks-agent",
+      "name": "2. Risks Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 100]
+    },
+    {
+      "parameters": {
+        "url": "http://image:8205/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/analyze_architecture\",\n  \"params\": {\n    \"image_url\": \"{{ $('Set Input Variables').item.json.architecture_image }}\",\n    \"project_context\": \"Architecture for {{ $('Set Input Variables').item.json.task_description }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "image-agent",
+      "name": "3. Image Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://progress:8202/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/jira_velocity\",\n  \"params\": {}\n}",
+        "options": {}
+      },
+      "id": "progress-agent",
+      "name": "4. Progress Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://health_monitor:8206/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/get_system_health\",\n  \"params\": {}\n}",
+        "options": {}
+      },
+      "id": "health-monitor-agent",
+      "name": "5. Health Monitor Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "url": "http://metrics_agent:8207/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/get_metrics\",\n  \"params\": {\n    \"agent_name\": \"all\"\n  }\n}",
+        "options": {}
+      },
+      "id": "metrics-agent",
+      "name": "6. Metrics Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "url": "http://digest:8204/mcp",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"method\": \"tools/daily_digest\",\n  \"params\": {}\n}",
+        "options": {}
+      },
+      "id": "digest-agent",
+      "name": "7. Digest Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-planner-risks",
+      "name": "Merge Planner + Risks",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1120, 100]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-image-progress",
+      "name": "Merge Image + Progress",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-health-metrics",
+      "name": "Merge Health + Metrics",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1120, 500]
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "merge-all-agents",
+      "name": "Merge All Agents",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all 7 agent results (robust with checks)\nconst items = $input.all();\n\n// Safe access with defaults\nconst getJson = (index, defaultObj = {}) => (items[index] && items[index].json) || defaultObj;\n\nconst plannerData = getJson(0);\nconst risksData = getJson(1);\nconst imageData = getJson(2);\nconst progressData = getJson(3);\nconst healthData = getJson(4);\nconst metricsData = getJson(5);\nconst digestData = getJson(6);\n\n// Extract key information\nconst report = {\n  timestamp: new Date().toISOString(),\n  task: $('Set Input Variables').item.json.task_description || 'No task',\n  \n  planning: {\n    subtasks: plannerData.subtasks || [],\n    subtasks_count: (plannerData.subtasks || []).length,\n    reasoning_steps: (plannerData.reasoning || []).length\n  },\n  \n  risks: {\n    total_risks: risksData.total_risks || 0,\n    top_risks: (risksData.detected_risks || []).slice(0, 3)\n  },\n  \n  architecture_analysis: {\n    provider: imageData.vision_provider || 'fallback',\n    summary: (imageData.analysis || '').substring(0, 200) + '...',\n    fallback_used: imageData.fallback_used || false\n  },\n  \n  project_velocity: {\n    status: progressData.velocity_status || 'unknown',\n    completion_rate: progressData.completion_rate || 0,\n    total_issues: progressData.total_issues || 0\n  },\n\n  system_health: {\n    status: healthData.overall_status || healthData.status || 'unknown',\n    fallback_used: healthData.fallback_used || false\n  },\n\n  system_metrics: {\n    total_requests: metricsData.total_requests || metricsData.processed_tasks || 0,\n    errors: metricsData.errors || metricsData.error_count || 0\n  },\n\n  daily_digest: {\n    date: digestData.date || new Date().toISOString().split('T')[0],\n    summary: digestData.summary || 'No digest available',\n    fallback_used: digestData.fallback_used || false\n  },\n  \n  recommendations: []\n};\n\n// Generate smart recommendations\nif (report.risks.total_risks > 5) report.recommendations.push('⚠️ High number of risks - prioritize mitigation');\nif (report.project_velocity.completion_rate < 50) report.recommendations.push('📊 Project velocity at risk - review resources');\nif (report.planning.subtasks_count > 7) report.recommendations.push('📋 Consider breaking down into smaller tasks');\nif (report.architecture_analysis.fallback_used) report.recommendations.push('🖼️ Vision analysis unavailable - manual review needed');\nif (report.system_health.status !== 'healthy' && report.system_health.status !== 'unknown') report.recommendations.push('🔴 System health issue detected');\nif (report.system_metrics.errors > 0) report.recommendations.push('⚠️ System errors detected - check logs');\nif (report.daily_digest.fallback_used) report.recommendations.push('📝 Daily digest fallback used');\nif (report.recommendations.length === 0) report.recommendations.push('✅ All systems operational - proceed with implementation');\n\nreturn { json: report };"
+      },
+      "id": "aggregate-report",
+      "name": "Aggregate Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "content": "=## 📊 Multi-Agent Analysis Complete\n\n**Task:** {{ $('Set Input Variables').json['task_description'] }}\n\n---\n\n### 📋 Planning Results\n- **Subtasks Generated:** {{ $('Aggregate Report').json['planning']['subtasks_count'] }}\n- **Reasoning Steps:** {{ $('Aggregate Report').json['planning']['reasoning_steps'] }}\n\n### ⚠️ Risk Analysis\n- **Total Risks:** {{ $('Aggregate Report').json['risks']['total_risks'] }}\n- **Top Risks:**\n{{ $('Aggregate Report').json['risks']['top_risks'].join('\\n  - ') }}\n\n### 🖼️ Architecture Review\n- **Vision Provider:** {{ $('Aggregate Report').json['architecture_analysis']['provider'] }}\n- **Analysis:** {{ $('Aggregate Report').json['architecture_analysis']['summary'] }}\n\n### 📊 Project Velocity\n- **Status:** {{ $('Aggregate Report').json['project_velocity']['status'] }}\n- **Completion Rate:** {{ $('Aggregate Report').json['project_velocity']['completion_rate'] }}%\n- **Total Issues:** {{ $('Aggregate Report').json['project_velocity']['total_issues'] }}\n\n### 🛡️ System Health\n- **Status:** {{ $('Aggregate Report').json['system_health']['status'] }}\n{{ if $('Aggregate Report').json['system_health']['fallback_used'] }}*(fallback used)*{{ end }}\n\n### 📈 System Metrics\n- **Total Requests Processed:** {{ $('Aggregate Report').json['system_metrics']['total_requests'] }}\n- **Errors:** {{ $('Aggregate Report').json['system_metrics']['errors'] }}\n\n### 📝 Daily Digest\n- **Date:** {{ $('Aggregate Report').json['daily_digest']['date'] }}\n- **Summary:** {{ $('Aggregate Report').json['daily_digest']['summary'] }}\n{{ if $('Aggregate Report').json['daily_digest']['fallback_used'] }}*(fallback used)*{{ end }}\n\n---\n\n### 💡 Recommendations\n{{ $('Aggregate Report').json['recommendations'].join('\\n') }}\n\n---\n\n📅 **Generated:** {{ $('Aggregate Report').json['timestamp'] }}",
+        "height": 950,
+        "width": 700
+      },
+      "id": "final-output",
+      "name": "📊 Final Report",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [1780, 400]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{"node": "Set Input Variables", "type": "main", "index": 0}]]
+    },
+    "Set Input Variables": {
+      "main": [
+        [
+          {"node": "1. Planner Agent", "type": "main", "index": 0},
+          {"node": "3. Image Agent", "type": "main", "index": 0},
+          {"node": "5. Health Monitor Agent", "type": "main", "index": 0},
+          {"node": "7. Digest Agent", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "1. Planner Agent": {
+      "main": [
+        [
+          {"node": "2. Risks Agent", "type": "main", "index": 0},
+          {"node": "Merge Planner + Risks", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "2. Risks Agent": {
+      "main": [[{"node": "Merge Planner + Risks", "type": "main", "index": 1}]]
+    },
+    "3. Image Agent": {
+      "main": [
+        [
+          {"node": "4. Progress Agent", "type": "main", "index": 0},
+          {"node": "Merge Image + Progress", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "4. Progress Agent": {
+      "main": [[{"node": "Merge Image + Progress", "type": "main", "index": 1}]]
+    },
+    "5. Health Monitor Agent": {
+      "main": [
+        [
+          {"node": "6. Metrics Agent", "type": "main", "index": 0},
+          {"node": "Merge Health + Metrics", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "6. Metrics Agent": {
+      "main": [[{"node": "Merge Health + Metrics", "type": "main", "index": 1}]]
+    },
+    "7. Digest Agent": {
+      "main": [[{"node": "Merge All Agents", "type": "main", "index": 3}]]
+    },
+    "Merge Planner + Risks": {
+      "main": [[{"node": "Merge All Agents", "type": "main", "index": 0}]]
+    },
+    "Merge Image + Progress": {
+      "main": [[{"node": "Merge All Agents", "type": "main", "index": 1}]]
+    },
+    "Merge Health + Metrics": {
+      "main": [[{"node": "Merge All Agents", "type": "main", "index": 2}]]
+    },
+    "Merge All Agents": {
+      "main": [[{"node": "Aggregate Report", "type": "main", "index": 0}]]
+    },
+    "Aggregate Report": {
+      "main": [[{"node": "📊 Final Report", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {}
+}
