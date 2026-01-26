@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Multi-agent intelligent system for DevOps automation and monitoring"
 authors = ["Tatiana Hlazkina, tatiana.adlock@gmail.com, Artem Statsenko"]
 license = "MIT"
-readme = "README.md"
+readme = "README.adoc"
 
 packages = [
     { include = "shared", from = "src" },
