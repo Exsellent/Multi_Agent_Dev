@@ -1,16 +1,12 @@
 = Multi-Agent DevOps Assistant
-:toc: macro
-:toc-placement: manual
-:toc-title: Содержание
+:toc:
 :toclevels: 3
 :icons: font
 :sectanchors:
 :sectlinks:
 
-toc::[]
-
-
 ---
+
 
 image:https://img.shields.io/badge/License-MIT-yellow.svg[License: MIT, link=https://opensource.org/licenses/MIT]
 image:https://img.shields.io/badge/python-3.12-blue.svg[Python 3.12, link=https://www.python.org/downloads/]
@@ -22,146 +18,103 @@ image:https://img.shields.io/badge/Groq-AI-red.svg[Groq, link=https://groq.com/]
 image:https://img.shields.io/badge/n8n-automation-orange.svg[n8n, link=https://n8n.io/]
 
 ---
-== 1. Общая идея проекта
 
-Система реализует мультиагентную архитектуру, в которой:
+== 1. Project Overview
 
-* каждый агент является отдельным сервисом;
-* взаимодействие осуществляется через MCP-протокол;
-* оркестрация выполняется с помощью n8n;
-* поддерживается масштабирование и отказоустойчивость;
-* используется LLM для анализа, генерации и reasoning;
-* присутствует мультимодальный агент (работа с изображениями).
+The system implements a multi-agent architecture in which:
 
+* each agent is a separate service;
+* interaction is carried out via the MCP protocol;
+* orchestration is performed using n8n;
+* scalability and fault tolerance are supported;
+* LLM is used for analysis, generation, and reasoning;
+* a multimodal agent is present (working with images).
 
 image::assets/AI_agents.png[Multi-Agent System Overview, width=800, align=center]
 
 ---
 
-=== 2.1 Общая архитектурная схема
+=== 2.1 General Architecture Diagram
 image::docs/diagrams/architecture.png[Multi-Agent System Overview, width=800, align=center]
 
-
-Диаграмма отражает:
-- роль n8n как оркестратора;
-- набор MCP-агентов;
-- взаимодействие с LLM-провайдерами;
-- вспомогательные сервисы (метрики, health-check, static server).
+The diagram illustrates:
+- the role of n8n as orchestrator;
+- the set of MCP agents;
+- interaction with LLM providers;
+- auxiliary services (metrics, health-check, static server).
 
 ---
 
-=== 2.2 Пайплайн обработки запросов (n8n → агенты)
+=== 2.2 Request Processing Pipeline (n8n → agents)
 
 image::docs/diagrams/pipeline.png[Multi-Agent System Overview, width=800, align=center]
 
-
-Пайплайн демонстрирует последовательность вызовов агентов,
-инициируемых workflow в n8n.
+The pipeline demonstrates the sequence of agent calls initiated by the workflow in n8n.
 
 ---
 
-=== 2.3 MCP-взаимодействие между агентами
+=== 2.3 MCP Interaction Between Agents
 
 image::docs/diagrams/mcp-sequence.png[MCP Sequence, width=800, align=center]
 
-Каждый агент обрабатывает MCP-запрос и возвращает структурированный JSON-ответ
-с результатами и шагами reasoning.
----
-
-== 3. Архитектура агентов
-
-Все агенты реализованы как независимые сервисы:
-
-* FastAPI
-* отдельный Docker-контейнер
-* endpoint `/health`
-* endpoint `/mcp`
-* структурированное логирование
-* единый формат сообщений
+Each agent processes an MCP request and returns a structured JSON response with results and reasoning steps.
 
 ---
+
+== 3. Agents
 
 === 3.1 Planner Agent
 
-**Назначение:**
-- принимает запрос от n8n;
-- планирует выполнение;
-- распределяет задачи между агентами;
-- агрегирует результаты.
+**Purpose:**
+- strategic task decomposition;
+- predictive estimation;
+- risk-aware planning.
 
-**Функции:**
-- координация пайплайна;
-- вызов других MCP-агентов;
-- формирование итогового ответа.
+=== 3.2 Risks Agent
 
----
+**Purpose:**
+- deep security and compliance risk analysis;
+- identification of vulnerabilities and threats.
 
-=== 3.2 Progress Agent
+=== 3.3 Architecture Intelligence Agent
 
-**Назначение:**
-- анализ прогресса и последовательности действий;
-- вычисление метрик выполнения;
-- подготовка аналитических выводов.
+**Purpose:**
+- multimodal analysis of architecture diagrams;
+- failure propagation simulation;
+- refactoring recommendations.
 
-Используется для демонстрации обработки данных и аналитики.
+=== 3.4 Code Execution Agent
 
----
+**Purpose:**
+- autonomous code generation;
+- execution and testing;
+- self-correction loops.
 
-=== 3.3 Risk Agent
+=== 3.5 Marathon Agent
 
-**Назначение:**
-- выявление потенциальных рисков;
-- анализ проблем и уязвимостей;
-- формирование рекомендаций.
-
-Работает на основе LLM.
-
----
-
-=== 3.4 Digest Agent
-
-**Назначение:**
-- агрегация информации от других агентов;
-- генерация итогового текстового отчёта;
-- подготовка сводки для пользователя.
-
----
-
-=== 3.5 Image Agent (мультимодальный)
-
-**Назначение:**
-- анализ изображений и схем;
-- генерация описаний;
-- работа с визуальными артефактами.
-
-Поддерживает:
-- передачу URL изображения;
-- взаимодействие с LLM (OpenRouter);
-- fallback-режим при ошибках.
-
----
+**Purpose:**
+- long-running tasks;
+- persistent state and thought signatures.
 
 === 3.6 Metrics Agent
 
-**Назначение:**
-- сбор и учёт метрик обработки;
-- подсчёт количества запросов;
-- подготовка данных для мониторинга.
-
----
+**Purpose:**
+- collection and accounting of processing metrics;
+- request counting;
+- data preparation for monitoring.
 
 === 3.7 Health Monitor
 
-**Назначение:**
-- проверка доступности агентов;
-- health-check эндпоинты;
-- основа для наблюдаемости системы.
+**Purpose:**
+- checking agent availability;
+- health-check endpoints;
+- foundation for system observability.
 
 ---
 
-== 4. MCP-протокол взаимодействия
+== 4. MCP Protocol for Interaction
 
-Все агенты принимают запросы в формате:
+All agents accept requests in the format:
 
 [source,json]
 ----
@@ -171,7 +124,7 @@ image::docs/diagrams/mcp-sequence.png[MCP Sequence, width=800, align=center]
 }
 ----
 
-И возвращают структурированный ответ:
+And return a structured response:
 
 [source,json]
 ----
@@ -180,7 +133,7 @@ image::docs/diagrams/mcp-sequence.png[MCP Sequence, width=800, align=center]
   "reasoning": [
     {
       "step_number": 1,
-      "description": "Описание шага",
+      "description": "Step description",
       "input_data": {},
       "output_data": {}
     }
@@ -188,44 +141,42 @@ image::docs/diagrams/mcp-sequence.png[MCP Sequence, width=800, align=center]
 }
 ----
 
-Такой формат обеспечивает:
-- прозрачность работы;
-- трассируемость решений;
-- удобство отладки.
+This format provides:
+- transparency of operation;
+- traceability of decisions;
+- ease of debugging.
 
 ---
 
-== 5. Развёртывание
+== 5. Deployment
 
-=== 5.1 Требования
+=== 5.1 Requirements
 
 * Docker
 * Docker Compose
 * Linux / WSL / macOS
-* установленный PlantUML-плагин (для документации)
+* PlantUML plugin installed (for documentation)
 
----
-
-=== 5.2 Запуск системы
+=== 5.2 Starting the System
 
 [source,bash]
 ----
 docker compose up --build
 ----
 
-После запуска становятся доступны:
+After launch, the following become available:
 
 * n8n — http://localhost:5678
-* агенты — порты 8201–8207
+* agents — ports 8201–8207
 * health-check — `/health`
 
 ---
 
-== 6. Переменные окружения
+== 6. Environment Variables
 
-Все секреты хранятся в `.env` и не коммитятся в репозиторий.
+All secrets are stored in `.env` and are not committed to the repository.
 
-Пример:
+Example:
 
 [source,env]
 ----
@@ -246,40 +197,52 @@ PYTHONUNBUFFERED=1
 
 ---
 
-== 7. Наблюдаемость и устойчивость
+== 7. Observability and Resilience
 
-* каждый агент имеет `/health`;
-* ошибки логируются;
-* сбой одного агента не останавливает систему;
-* n8n может повторять вызовы;
-* метрики собираются через Metrics Agent.
-
----
-
-== 8. Масштабируемость
-
-Архитектура поддерживает:
-
-* добавление новых агентов без изменения ядра;
-* горизонтальное масштабирование контейнеров;
-* замену LLM-провайдера;
-* расширение MCP-методов.
+* each agent has `/health`;
+* errors are logged;
+* failure of one agent does not stop the system;
+* n8n can retry calls;
+* metrics are collected via Metrics Agent.
 
 ---
 
-== 9. Итог
+== 8. Scalability
+
+The architecture supports:
+
+* adding new agents without changing the core;
+* horizontal scaling of containers;
+* replacing the LLM provider;
+* extending MCP methods.
+
+---
+
+== 9. Conclusion
 
 [options="header"]
 |===
-| Проект демонстрирует:
+| The project demonstrates:
 
-| ✅ многоагентную архитектуру
-| ✅ MCP-взаимодействие
-| ✅ мультимодальность
-| ✅ n8n orchestration
-| ✅ масштабируемость
-| ✅ устойчивость
-| ✅ документированность
+| Multi-agent architecture
+| MCP interaction
+| Multimodality
+| n8n orchestration
+| Scalability
+| Resilience
+| Documentation
 |===
 
-Система может служить основой для DevOps-помощника или обучающего прототипа мультиагентных систем.
+[[license]]
+== License
+
+MIT License
+
+---
+
+[[team]]
+== Team
+
+**Tatiana Hlazkina**
+📧 tatiana.adlock@gmail.com
+🔗 https://github.com/Exsellent/
